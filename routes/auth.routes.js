@@ -5,12 +5,7 @@ const jwt = require("jsonwebtoken");
 const { USER } = require("../models/user.model");
 const { UserDto } = require("../dto/user.dto");
 
-
-TODO: //update token terms
-
-
-
-// get all user 
+// get all user
 router.get("/allUsers", async (req, res) => {
   const users = await USER.find().select("-hashPassword");
   if (!users) return res.status(400).json({ msg: "No users Yet" });
@@ -28,7 +23,7 @@ router.get("/user/:id", async (req, res) => {
   }
 });
 
-// sign Up 
+// sign Up
 router.post("/signUp", async (req, res) => {
   const registered = await USER.findOne({ email: req.body.email });
   if (registered)
@@ -51,7 +46,7 @@ router.post("/signUp", async (req, res) => {
   res.status(200).json({ msg: "user created successfully" });
 });
 
-// sign in 
+// sign in
 router.post("/signIn", async (req, res) => {
   const { email, password } = req.body;
 

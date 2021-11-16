@@ -61,7 +61,7 @@ router.get('/get/topDeals',async (req,res)=>{
   res.status(200).send(products);
 })
 
-// get count of products
+// get count of all products
 router.get('/get/count',  async(req, res) => {
   let productCount = await PRODUCT.countDocuments();
 

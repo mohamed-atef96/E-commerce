@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { Category } = require('../../../models/category');
 const {Schema} = mongoose;
 const objectId = mongoose.Schema.Types.ObjectId
 
@@ -14,17 +13,13 @@ const rateSchema = new Schema({
         required:true
 
     },
-    average:{
-        type:Number,
-        required:true
-    },
     user:{
         type:objectId,
         ref:'users'
     }
 })
 
-const RATE  = mongoose.model('rates',ratingSchema);
+const RATE  = mongoose.model('rates',rateSchema);
 
 module.exports = {RATE};
 
