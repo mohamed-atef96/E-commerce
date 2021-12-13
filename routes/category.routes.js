@@ -23,9 +23,9 @@ router.post('/create',async(req,res)=>{
         name,
         icon
     } = req.body
-    const categoryExist = CATEGORY.findOne({name:name});
+    // const categoryExist = CATEGORY.findOne({name:name});
 
-    if(categoryExist) return res.status(401).json({msg:"This Category Is Already Exist"})
+    // if(categoryExist) return res.status(401).json({msg:"This Category Is Already Exist"})
 
     const category = new CATEGORY({
         name,

@@ -1,9 +1,8 @@
+const UserDto = ({ _id, name, email, isAdmin }) => ({
+  id: _id,
+  name,
+  email,
+  isAdmin,
+});
 
-const UserDto = ({_id, name, email}) => ({
-    id: _id,
-    name,
-    email,
-})
-
-
-module.exports = {UserDto}
+module.exports = { UserDto };

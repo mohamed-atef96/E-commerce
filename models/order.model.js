@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose;
-const objectId = mongoose.Schema.Types.ObjectIdl;
+const {Schema} = mongoose;
+const objectId = mongoose.Schema.Types.ObjectId;
 
 const orderSchema = new Schema({
   user: {
@@ -10,12 +10,12 @@ const orderSchema = new Schema({
   },
   orderItems: [
     {
-      type: mongoose.Schema.Types.ObjectId,
+      type: objectId,
       ref: "OrderItems",
       required: true,
-    },
+    }
   ],
-  total: {
+  total: {  
     type: Number,
     required: true,
   },

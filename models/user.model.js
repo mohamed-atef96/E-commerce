@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const {Schema} = mongoose;
+const objectId = mongoose.Schema.Types.ObjectId
 
 const userSchema = new Schema({
     name:{
@@ -38,6 +39,11 @@ const userSchema = new Schema({
     isAdmin:{
         type:Boolean,
         default:false
+    },
+    cart:{
+        type:objectId,
+        ref:'carts',
+        requires:true
     },
     createdAt:{
         type:Date,

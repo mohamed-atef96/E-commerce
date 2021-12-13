@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const {Schema} = mongoose;
 const objectId = mongoose.Schema.Types.ObjectId;
-const orderItemSchema =new Schema({
+const cartItemSchema =new Schema({
     quantity: {
         type: Number,
         required: true
@@ -17,5 +17,5 @@ const orderItemSchema =new Schema({
     }
 })
 
-const ORDERITEM = mongoose.model('OrderItems', orderItemSchema);
-module.exports = {ORDERITEM}
+const CARTITEMS = mongoose.model('cartItems', cartItemSchema);
+module.exports = {CARTITEMS}

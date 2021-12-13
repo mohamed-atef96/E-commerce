@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { USER } = require("../models/user.model");
+const { CART } = require("../models/cart.model");
 const { UserDto } = require("../dto/user.dto");
 
 // get all user
@@ -59,6 +60,7 @@ router.post("/signIn", async (req, res) => {
     _id: userExist._id,
     name: userExist.name,
     email: userExist.email,
+    isAdmin: userExist.isAdmin,
   });
   const token = jwt.sign(userData, process.env.key);
   res.status(200).json({ user: userData, token });
@@ -110,4 +112,34 @@ router.delete("/deleteUser/:id", async (req, res) => {
     return res.status(500).json({ error: err });
   }
 });
+
+// users count
+router.get(`/get/count`, async (req, res) => {
+  const usersCount = await USER.countDocuments();
+
+  if (!usersCount) {
+    res.send(500).json({ success: false });
+  }
+
+  res.send({ usersCount });
+});
+
+// edit admin 
+router.put("/updateIsAdmin/:id", async (req, res) => {
+  const { id } = req.params;
+  const userExist = await USER.findById(id);
+
+  if (!userExist) return res.status(400).json({ msg: "user not found" });
+  
+  const userUpdated = await USER.findByIdAndUpdate(
+    id,
+    {
+      isAdmin: req.body.isAdmin,
+      },
+    { new: true }
+  );
+
+  res.status(200).json({ msg: "user updated successfully", userUpdated });
+});
+
 module.exports = router;

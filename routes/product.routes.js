@@ -3,28 +3,28 @@ const router = express.Router();
 const { PRODUCT } = require("../models/product.model");
 const { CATEGORY } = require("../models/category.model");
 const multer = require("multer");
-
-const fileType = {
+const imageType = {
   "image/png": "png",
-  "image/jpeg": "jpeg",
   "image/jpg": "jpg",
+  "image/jpeg": "jpeg",
 };
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const isValid = fileType[file.mimetype];
     let imageTypeError = new Error("invalid image type");
+    const isValid = imageType[file.mimetype];
     if (isValid) {
       imageTypeError = null;
     }
     cb(imageTypeError, "public/uploads");
   },
   filename: function (req, file, cb) {
-    //remove spaces from file name if exist
-    const fileName = file.originalname.split(" ").join("-");
-    const extension = fileType[file.mimetype];
-    cb(null, `${fileName}-${Date.now()}.${extension}`);
+    const extension = imageType[file.mimetype];
+    const fileName = file.originalname.replace(" ", "-");
+    cb(null, fileName + Date.now() + "." + extension);
   },
 });
+
 const upload = multer({ storage: storage });
 
 // get all products
@@ -44,6 +44,15 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   const products = await PRODUCT.findById(id).populate("category");
+  if (!products)
+    return res.status(500).json({ msg: "Error Canno't Get Product" });
+  res.status(200).send(products);
+});
+
+// get by category products
+router.get("/get/category/:id", async (req, res) => {
+  const catID = req.params.id;
+  const products = await PRODUCT.find({ category: catID }).populate("category");
   if (!products)
     return res.status(500).json({ msg: "Error Canno't Get Product" });
   res.status(200).send(products);
@@ -109,11 +118,12 @@ router.get("/get/count", async (req, res) => {
 
 // create new product
 router.post("/create", upload.array("images", 10), async (req, res) => {
-  const { name, description, brand, price, categoryId, quantity } = req.body;
-  const category = await CATEGORY.findById(categoryId);
-  if (!category) return res.status(401).json({ msg: "Category Not Found" });
+  const { name, description, brand, price, category, quantity } = req.body;
+  const categoryExist = await CATEGORY.findById(category);
+  if (!categoryExist)
+    return res.status(401).json({ msg: "Category Not Found" });
   const files = req.files;
-  const baseUrl = `${req.protocol}://${req.get("host")}/public/images`;
+  const baseUrl = `${req.protocol}://${req.get("host")}/public/uploads/`;
   const imagesPaths = [];
   if (files) {
     files.map((image) => imagesPaths.push(`${baseUrl}${image.filename}`));
@@ -126,7 +136,7 @@ router.post("/create", upload.array("images", 10), async (req, res) => {
     images: imagesPaths,
     price,
     quantity,
-    category: categoryId,
+    category,
   });
 
   await product.save();
@@ -134,14 +144,23 @@ router.post("/create", upload.array("images", 10), async (req, res) => {
   res.status(200).send(product);
 });
 
-// update category
-router.put("/update/:id", async (req, res) => {
+// update product
+router.put("/update/:id", upload.array("images", 10), async (req, res) => {
   const { id } = req.params;
-  const { name, description, brand, images, price, categoryId, quantity } =
-    req.body;
-
-  const category = await CATEGORY.findById(categoryId);
-  if (!category) return res.status(401).json({ msg: "Category Not Found" });
+  const { name, description, brand, price, category, quantity } = req.body;
+  const categoryExist = await CATEGORY.findById(category);
+  if (!categoryExist) {
+    return res.status(401).json({ msg: "Category Not Found" });
+  }
+  const productExist = await PRODUCT.findById(id);
+  const files = req.files;
+  const baseUrl = `${req.protocol}://${req.get("host")}/public/uploads/`;
+  const imagesPaths = [];
+  if (files.length) {
+    files.map((image) => imagesPaths.push(`${baseUrl}${image.filename}`));
+  } else {
+    imagesPaths.push(...productExist.images);
+  }
 
   const product = await PRODUCT.findByIdAndUpdate(
     id,
@@ -149,10 +168,10 @@ router.put("/update/:id", async (req, res) => {
       name,
       description,
       brand,
-      images,
+      images: imagesPaths,
       price,
       quantity,
-      category: categoryId,
+      category,
     },
     { new: true }
   ).populate("category");

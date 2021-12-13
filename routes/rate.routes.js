@@ -36,7 +36,7 @@ router.get("/averageRate/:productId", async (req, res) => {
     { $match: { product: ObjectId(productId) } },
     {
       $group: {
-        _id: "$product",
+        _id: null,
         averageRating: { $avg: "$rate" },
       },
     },
@@ -74,7 +74,7 @@ router.post("/addRate", async (req, res) => {
     { $match: { product: ObjectId(productId) } },
     {
       $group: {
-        _id: "$product",
+        _id: null,
         averageRating: { $avg: "$rate" },
       },
     },

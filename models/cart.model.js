@@ -3,14 +3,16 @@ const {Schema}  = mongoose;
 const objectId = mongoose.Schema.Types.ObjectId
 
 const cartSchema = new Schema({
-    items:[{
-        type:objectId,
-        ref:'products'
-    }],
-    quantity:{
-        type:Number,
-        required:true
-    },
+    cartItems: [
+        {
+          type: objectId,
+          ref: "cartItems",
+        }
+      ],
+      total:{
+          type:Number,
+          required:true
+      },
     user:{
         type:objectId,
         ref:'users'
