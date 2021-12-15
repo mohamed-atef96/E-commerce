@@ -30,11 +30,18 @@ const upload = multer({ storage: storage });
 // get all products
 router.get("/", async (req, res) => {
   const categories = req.query.categories;
+  const search = req.query.search;
+  let products
   let filter = {};
   if (categories) {
     filter = { category: categories.split(",") };
   }
-  const products = await PRODUCT.find(filter).populate("category");
+  if(search){
+    products = await PRODUCT.find({name:{$regex:search , $options:'i'}}).populate("category");      
+  }else{
+
+    products = await PRODUCT.find(filter).populate("category");
+  }
   if (!products)
     return res.status(500).json({ msg: "Error Canno't Get Products" });
   res.status(200).send(products);
@@ -60,7 +67,7 @@ router.get("/get/category/:id", async (req, res) => {
 
 // get featured products
 router.get("/get/featured", async (req, res) => {
-  const count = req.query.count ? req.query.count : 6;
+  const count = req.query.count ? req.query.count : 4;
   const products = await PRODUCT.find({ isFeatured: true })
     .populate("category")
     .limit(Number(count));
@@ -83,7 +90,7 @@ router.get("/get/new", async (req, res) => {
 
 // get top rated
 router.get("/get/topRated", async (req, res) => {
-  const count = req.query.count ? req.query.count : 6;
+  const count = req.query.count ? req.query.count : 4;
   const products = await PRODUCT.find()
     .sort({ averageRate: -1 })
     .populate("category")
@@ -118,7 +125,8 @@ router.get("/get/count", async (req, res) => {
 
 // create new product
 router.post("/create", upload.array("images", 10), async (req, res) => {
-  const { name, description, brand, price, category, quantity } = req.body;
+  const { name, description, brand, price, category, quantity, isFeatured } =
+    req.body;
   const categoryExist = await CATEGORY.findById(category);
   if (!categoryExist)
     return res.status(401).json({ msg: "Category Not Found" });
@@ -137,6 +145,7 @@ router.post("/create", upload.array("images", 10), async (req, res) => {
     price,
     quantity,
     category,
+    isFeatured,
   });
 
   await product.save();
@@ -147,7 +156,8 @@ router.post("/create", upload.array("images", 10), async (req, res) => {
 // update product
 router.put("/update/:id", upload.array("images", 10), async (req, res) => {
   const { id } = req.params;
-  const { name, description, brand, price, category, quantity } = req.body;
+  const { name, description, brand, price, category, quantity, isFeatured } =
+    req.body;
   const categoryExist = await CATEGORY.findById(category);
   if (!categoryExist) {
     return res.status(401).json({ msg: "Category Not Found" });
@@ -172,6 +182,7 @@ router.put("/update/:id", upload.array("images", 10), async (req, res) => {
       price,
       quantity,
       category,
+      isFeatured,
     },
     { new: true }
   ).populate("category");
